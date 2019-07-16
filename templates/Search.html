@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск исполнителя для заданной заявки</title>
+
+    <link rel="stylesheet" href="{% static 'ModalPhoto.css' %}">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+  <h5 class="my-0 mr-md-auto font-weight-normal">ГБУ "Автомобильные дороги"</h5>
+  <nav class="my-2 my-md-0 mr-md-3">
+    <a class="p-2 text-dark" href="/">Найти исполнителя</a>
+    <a class="p-2 text-dark" href="/add/">Добавить заявку</a>
+  </nav>
+    <img src="{% static 'media/index_images/road-icon.png' %}" height="50" width="50">
+</div>
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-lg-6 mb-lg-5">
+            <h1>Поиск исполнителя</h1>
+            <p>Введите номер заявки для поиска отдела, отвечающего за устранение проблем, указанных в ней</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row align-items-center">
+                    <div class="col-lg-8">
+                        {{ search_form.RequestNumber }}
+                    </div>
+                    <div class="col-lg-2">
+                        <button type="button" class="btn btn-info">Найти</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+    {% if IsNotFirstResponse %}
+    <div class="row">
+        <div class="col-lg-6">
+            <h2>Заявка</h2>
+            {% if searched_request is None %}
+                <div class="alert alert-danger" role="alert">
+                     Заявка не найдена!
+                </div>
+            {% else %}
+
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Номер:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.Number }}">
+                      </div>
+                  </div>
+
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Проблема:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.TypeOfDefect }}">
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">ФИО отправителя:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.Name }}">
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Адресс:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.Address }}">
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Административный округ:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.AdministrativeDistrict }}">
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Описание:</label>
+                      <div class="col-lg-8">
+                          <textarea class="form-control" rows="3" readonly>{{ searched_request.Description}}</textarea>
+                      </div>
+                  </div>
+                {% if photos is None %}
+                {% else %}
+
+                    <div class="form-group row">
+                      <div class="col-lg-8">
+                             <label class="col-lg-4 col-form-label">Фото:</label>
+                      </div>
+                     </div>
+
+                    {% for photo in photos %}
+                    <div class="form-group row">
+                         <div class="col-lg-8">
+                             <img src="{{photo.Image.url}}" height="100%" width="100%" class="ModalImage">
+                         </div>
+                     </div>
+                    {% endfor %}
+                    <!-- Модальное окно для вывода фотографий -->
+                    <div id="Modal" class="modal">
+                        <span class="close" onclick="document.getElementById('Modal').style.display='none'">&times;</span>
+                        <img class="modal-content" id="img01">
+                        <div id="caption"></div>
+                    </div>
+
+                {% endif %}
+
+                </form>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-6">
+            <h2>Исполнитель</h2>
+            {% if department is None %}
+                <div class="alert alert-danger" role="alert">
+                     Исполнитель не найден!
+                </div>
+             {% else %}
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Наименование отдела:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ department.Name }}">
+                      </div>
+                  </div>
+
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Проблема:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.TypeOfDefect }}">
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label class="col-lg-4 col-form-label">Округ:</label>
+                      <div class="col-lg-8">
+                          <input type="text" readonly class="form-control-plaintext"
+                                 value="{{ searched_request.AdministrativeDistrict }}">
+                      </div>
+                  </div>
+             {% endif %}
+        </div>
+    {% endif %}
+    </div>
+</div>
+
+<script src="{% static 'ModalPhoto.js' %}"></script>
+
+</body>
+</html>
